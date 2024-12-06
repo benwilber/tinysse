@@ -8,7 +8,10 @@ Tiny SSE Server
 
 This server supports Lua scripting for customization. Use the following options to configure the server.
 
-Duration Format: Time-related options (e.g., keep-alive, timeout) use a human-readable format: - `1s` means 1 second. - `1000ms` means 1000 milliseconds (can be shortened to `1s`). - Other examples: `5m` (5 minutes), `2h` (2 hours), `3d` (3 days).
+Duration Format: Time-related options (e.g., keep-alive, timeout) use a human-readable format:
+  - `1s` means 1 second.
+  - `1000ms` means 1000 milliseconds (can be shortened to `1s`).
+  - Other examples: `5m` (5 minutes), `2h` (2 hours), `3d` (3 days).
 
 Use these formats consistently for options like `--keep-alive`, `--timeout`, etc.
 
