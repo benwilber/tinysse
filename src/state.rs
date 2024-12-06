@@ -2,11 +2,11 @@ use std::time::Duration;
 
 use tokio::sync::broadcast;
 
-use crate::{cli::Cli, script::Script, types::Message};
+use crate::{cli::Cli, req::PublishRequest, script::Script};
 
 #[derive(Debug, Clone)]
 pub struct AppState {
-    pub broadcast: broadcast::Sender<Message>,
+    pub broadcast: broadcast::Sender<PublishRequest>,
     pub script: Script,
     pub keep_alive: Duration,
     pub keep_alive_text: String,

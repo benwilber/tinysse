@@ -1,23 +1,27 @@
 use std::{fs, path::Path};
 
-use crate::{types::Message, userdata};
-use mlua::Lua;
+use crate::{
+    req::{PublishRequest, SubscribeRequest},
+    userdata,
+};
 
 #[derive(Debug, Clone)]
 pub struct Script {
-    lua: Lua,
+    lua: mlua::Lua,
 }
 
 impl Script {
     pub fn new() -> Self {
-        let script = Self { lua: Lua::new() };
+        let script = Self {
+            lua: mlua::Lua::new(),
+        };
         script.init();
         script
     }
 
     pub fn unsafe_new() -> Self {
         let script = Self {
-            lua: unsafe { Lua::unsafe_new() },
+            lua: unsafe { mlua::Lua::unsafe_new() },
         };
         script.init();
         script
@@ -63,41 +67,61 @@ impl Script {
         Ok(self)
     }
 
-    pub async fn publish(&self, msg: &Message) -> anyhow::Result<Option<Message>> {
+    pub async fn publish(&self, pub_req: PublishRequest) -> anyhow::Result<Option<PublishRequest>> {
         let globals = self.lua.globals();
 
         if let Ok(publish_fn) = globals.get::<mlua::Function>("publish") {
-            let lua_msg = msg.to_lua(&self.lua)?;
-
-            if let Some(msg) = publish_fn
-                .call_async::<Option<mlua::Table>>(lua_msg)
+            if let Some(pub_req) = publish_fn
+                .call_async::<Option<PublishRequest>>(pub_req)
                 .await?
             {
-                Ok(Some(msg.into()))
+                Ok(Some(pub_req))
             } else {
                 Ok(None)
             }
         } else {
-            Ok(Some(msg.to_owned()))
+            Ok(Some(pub_req))
         }
     }
 
-    pub async fn message(&self, msg: &Message) -> anyhow::Result<Option<Message>> {
+    pub async fn subscribe(
+        &self,
+        sub_req: SubscribeRequest,
+    ) -> anyhow::Result<Option<SubscribeRequest>> {
         let globals = self.lua.globals();
 
-        if let Ok(message_fn) = globals.get::<mlua::Function>("message") {
-            let lua_msg = msg.to_lua(&self.lua)?;
-
-            if let Some(msg) = message_fn
-                .call_async::<Option<mlua::Table>>(lua_msg)
+        if let Ok(subscribe_fn) = globals.get::<mlua::Function>("subscribe") {
+            if let Some(sub_req) = subscribe_fn
+                .call_async::<Option<SubscribeRequest>>(sub_req)
                 .await?
             {
-                Ok(Some(msg.into()))
+                Ok(Some(sub_req))
             } else {
                 Ok(None)
             }
         } else {
-            Ok(Some(msg.to_owned()))
+            Ok(Some(sub_req))
+        }
+    }
+
+    pub async fn message(
+        &self,
+        pub_req: PublishRequest,
+        sub_req: &SubscribeRequest,
+    ) -> anyhow::Result<Option<PublishRequest>> {
+        let globals = self.lua.globals();
+
+        if let Ok(message_fn) = globals.get::<mlua::Function>("message") {
+            if let Some(pub_req) = message_fn
+                .call_async::<Option<PublishRequest>>((pub_req, sub_req.clone()))
+                .await?
+            {
+                Ok(Some(pub_req))
+            } else {
+                Ok(None)
+            }
+        } else {
+            Ok(Some(pub_req))
         }
     }
 }

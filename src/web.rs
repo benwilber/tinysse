@@ -1,8 +1,8 @@
-use std::convert::Infallible;
+use std::{convert::Infallible, net::SocketAddr};
 
 use axum::{
     body, debug_handler,
-    extract::State,
+    extract::{ConnectInfo, State},
     http::StatusCode,
     response::{
         sse::{Event, KeepAlive},
@@ -20,7 +20,12 @@ use serde_json::json;
 use tokio_stream::wrappers::BroadcastStream;
 use tracing::{debug, error};
 
-use crate::{error::AppError, state::AppState, types::Message};
+use crate::{
+    error::AppError,
+    msg::Message,
+    req::{PublishRequest, Request, SubscribeRequest},
+    state::AppState,
+};
 
 pub fn router(_state: &AppState) -> Router<AppState> {
     Router::new()
@@ -47,13 +52,17 @@ fn decode_raw_body(mime: &Mime, raw: &body::Bytes) -> Result<Message, AppError> 
 #[debug_handler]
 async fn publish(
     State(state): State<AppState>,
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
     TypedHeader(content_type): TypedHeader<ContentType>,
-    raw: body::Bytes,
+    axum_req: axum::extract::Request,
 ) -> Result<impl IntoResponse, AppError> {
+    let req = Request::new(addr, &axum_req);
+    let raw = body::to_bytes(axum_req.into_body(), usize::MAX).await?;
     let msg = decode_raw_body(&content_type.into(), &raw)?;
+    let pub_req = PublishRequest::new(req, msg);
 
-    if let Some(msg) = state.script.publish(&msg).await? {
-        let subs = state.broadcast.send(msg).unwrap_or(0);
+    if let Some(pub_req) = state.script.publish(pub_req).await? {
+        let subs = state.broadcast.send(pub_req).unwrap_or(0);
 
         Ok((
             StatusCode::ACCEPTED,
@@ -73,14 +82,20 @@ async fn publish(
 #[debug_handler]
 async fn subscribe(
     State(state): State<AppState>,
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    axum_req: axum::extract::Request,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+    let req = Request::new(addr, &axum_req);
+    let sub_req = SubscribeRequest::new(req);
+    let sub_req = state.script.subscribe(sub_req).await.unwrap().unwrap();
+
     let events = async_stream::stream! {
         let event_stream = stream::once(async { Ok(Event::default().comment("ok")) }).chain(
-            BroadcastStream::new(state.broadcast.subscribe()).filter_map(|msg| async { match msg {
-                Ok(msg) if !msg.is_empty() => {
-                    match state.script.message(&msg).await {
-                        Ok(Some(msg)) if !msg.is_empty() => {
-                            Some(Ok(msg.into()))
+            BroadcastStream::new(state.broadcast.subscribe()).filter_map(|pub_req| async { match pub_req {
+                Ok(pub_req) if !pub_req.msg().is_empty() => {
+                    match state.script.message(pub_req, &sub_req).await {
+                        Ok(Some(pub_req)) if !pub_req.msg().is_empty() => {
+                            Some(Ok(pub_req.msg().clone().into()))
                         },
                         Ok(_) => {
                             debug!("received empty message from script");

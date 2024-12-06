@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 use axum::Router;
 use clap::Parser;
 
@@ -46,7 +48,8 @@ async fn try_main(cli: &Cli) -> anyhow::Result<()> {
                     ),
             ),
         )
-        .with_state(state);
+        .with_state(state)
+        .into_make_service_with_connect_info::<SocketAddr>();
 
     let listener = TcpListener::bind(&cli.listen).await?;
     let local_addr = listener.local_addr()?;
