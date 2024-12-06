@@ -85,20 +85,34 @@ local log = require "log"
 local json = require "json"
 local uuid = require "uuid"
 
-function publish(msg)
-    -- Add a unique id to the message
-    msg.id = uuid()
-    log.info(("publish: msg=%s"):format(json(msg)))
+function publish(pub)
+    -- For example, add unique IDs to the publisher and message
+    pub.id = uuid()
+    pub.msg.id = uuid()
 
-    -- Return the message to be published to all subscribers
-    return msg
+    log.info(("publish: pub=%s"):format(json(pub)))
+
+    -- Return the publish request
+    return pub
 end
 
-function message(msg)
-    log.info(("message: msg=%s"):format(json(msg)))
+function subscribe(sub)
+    -- Add a unique ID to the subscriber
+    sub.id = uuid()
 
-    -- Return the message to be published to this subscriber
-    return msg
+    log.info(("subscribe: sub=%s"):format(json(sub)))
+
+    -- Return the subscribe request
+    return sub
+end
+
+function message(pub, sub)
+    -- `pub` and `sub` are the request tables returned
+    -- from the publish and subscribe methods.
+    log.info(("message: pub=%s, sub=%s"):format(json(pub), json(sub)))
+
+    -- Return the publish request
+    return pub
 end
 ```
 
