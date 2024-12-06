@@ -27,7 +27,7 @@ impl mlua::FromLua for Addr {
             }),
             None => Err(mlua::Error::FromLuaConversionError {
                 from: value.type_name(),
-                to: "Addr".to_string(),
+                to: std::any::type_name::<Self>().to_string(),
                 message: Some("expected table".to_string()),
             }),
         }
@@ -101,7 +101,7 @@ impl mlua::FromLua for Request {
             }),
             None => Err(mlua::Error::FromLuaConversionError {
                 from: value.type_name(),
-                to: "Request".to_string(),
+                to: std::any::type_name::<Self>().to_string(),
                 message: Some("expected table".to_string()),
             }),
         }
@@ -168,7 +168,7 @@ impl mlua::FromLua for PublishRequest {
             }
             None => Err(mlua::Error::FromLuaConversionError {
                 from: value.type_name(),
-                to: "Publish".to_string(),
+                to: std::any::type_name::<Self>().to_string(),
                 message: Some("expected table".to_string()),
             }),
         }
@@ -223,7 +223,7 @@ impl mlua::FromLua for SubscribeRequest {
             }
             None => Err(mlua::Error::FromLuaConversionError {
                 from: value.type_name(),
-                to: "Subscribe".to_string(),
+                to: std::any::type_name::<Self>().to_string(),
                 message: Some("expected table".to_string()),
             }),
         }
