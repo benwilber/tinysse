@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{path::PathBuf, time::Duration};
 
 use tokio::sync::broadcast;
 
@@ -12,6 +12,9 @@ pub struct AppState {
     pub keep_alive_text: String,
     pub timeout: Duration,
     pub timeout_retry: Duration,
+    pub pub_path: String,
+    pub sub_path: String,
+    pub serve_root_dir: Option<PathBuf>,
 }
 
 impl AppState {
@@ -35,6 +38,9 @@ impl AppState {
             keep_alive_text: cli.keep_alive_text.clone(),
             timeout: cli.timeout,
             timeout_retry: cli.timeout_retry,
+            pub_path: cli.pub_path.clone(),
+            sub_path: cli.sub_path.clone(),
+            serve_root_dir: cli.serve_root_dir.clone(),
         })
     }
 }

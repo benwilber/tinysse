@@ -1,5 +1,6 @@
 use clap::Parser;
 use humantime::parse_duration;
+use mlua::LuaSerdeExt;
 use std::{net::SocketAddr, path::PathBuf, time::Duration};
 use tracing::Level;
 
@@ -15,7 +16,7 @@ use tracing::Level;
 /// - Other examples: `5m` (5 minutes), `2h` (2 hours), `3d` (3 days).
 ///
 /// Use these formats consistently for options like `--keep-alive`, `--timeout`, etc.
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, Parser)]
 pub struct Cli {
     #[clap(
         short,
@@ -97,7 +98,7 @@ pub struct Cli {
     #[clap(
         short = 's',
         long,
-        value_name = "PATH",
+        value_name = "FILE_PATH",
         env = "TINYSSE_SCRIPT",
         help = "The path to a Lua script for server customization"
     )]
@@ -112,4 +113,64 @@ pub struct Cli {
                 Use this option only if you trust the Lua script and need it to load native modules."
     )]
     pub unsafe_script: bool,
+
+    #[clap(
+        short = 'P',
+        long,
+        value_name = "URL_PATH",
+        default_value = "/publish",
+        env = "TINYSSE_PUB_PATH",
+        help = ""
+    )]
+    pub pub_path: String,
+
+    #[clap(
+        short = 'S',
+        long,
+        value_name = "URL_PATH",
+        default_value = "/subscribe",
+        env = "TINYSSE_SUB_PATH",
+        help = ""
+    )]
+    pub sub_path: String,
+
+    #[clap(
+        short = 'D',
+        long,
+        value_name = "DIR_PATH",
+        env = "TINYSSE_SERVE_ROOT_DIR",
+        help = ""
+    )]
+    pub serve_root_dir: Option<PathBuf>,
+}
+
+impl mlua::IntoLua for Cli {
+    fn into_lua(self, lua: &mlua::Lua) -> mlua::Result<mlua::Value> {
+        let tbl = lua.create_table()?;
+
+        tbl.set("listen", self.listen.to_string())?;
+        tbl.set("log_level", self.log_level.to_string())?;
+        tbl.set("keep_alive", self.keep_alive.as_millis())?;
+        tbl.set("keep_alive_text", self.keep_alive_text)?;
+        tbl.set("timeout", self.timeout.as_millis())?;
+        tbl.set("timeout_retry", self.timeout_retry.as_millis())?;
+        tbl.set("capacity", self.capacity)?;
+        tbl.set(
+            "script",
+            self.script
+                .as_ref()
+                .map(|p| p.to_string_lossy().into_owned()),
+        )?;
+        tbl.set("unsafe_script", self.unsafe_script)?;
+        tbl.set("pub_path", self.pub_path)?;
+        tbl.set("sub_path", self.sub_path)?;
+        tbl.set(
+            "serve_root_dir",
+            self.serve_root_dir
+                .as_ref()
+                .map(|p| p.to_string_lossy().into_owned()),
+        )?;
+
+        lua.to_value(&tbl)
+    }
 }

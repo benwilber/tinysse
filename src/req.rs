@@ -192,16 +192,25 @@ impl mlua::IntoLua for PublishRequest {
 #[derive(Debug, Clone)]
 pub struct SubscribeRequest {
     req: Request,
+    last_event_id: Option<String>,
     meta: Option<mlua::Table>,
 }
 
 impl SubscribeRequest {
-    pub fn new(req: Request) -> Self {
-        Self { req, meta: None }
+    pub fn new(req: Request, last_event_id: Option<String>) -> Self {
+        Self {
+            req,
+            last_event_id,
+            meta: None,
+        }
     }
 
     pub fn req(&self) -> &Request {
         &self.req
+    }
+
+    pub fn last_event_id(&self) -> Option<&str> {
+        self.last_event_id.as_deref()
     }
 
     pub fn meta(&self) -> Option<&mlua::Table> {
@@ -216,8 +225,12 @@ impl mlua::FromLua for SubscribeRequest {
                 let req = tbl.get("req")?;
                 tbl.set("req", mlua::Value::Nil)?;
 
+                let last_event_id = tbl.get("last_event_id")?;
+                tbl.set("last_event_id", mlua::Value::Nil)?;
+
                 Ok(Self {
                     req,
+                    last_event_id,
                     meta: Some(tbl.clone()),
                 })
             }
@@ -238,6 +251,7 @@ impl mlua::IntoLua for SubscribeRequest {
         };
 
         tbl.set("req", self.req)?;
+        tbl.set("last_event_id", self.last_event_id)?;
 
         lua.to_value(&tbl)
     }

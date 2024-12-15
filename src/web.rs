@@ -1,4 +1,4 @@
-use std::{convert::Infallible, net::SocketAddr};
+use std::{convert::Infallible, net::SocketAddr, time::Instant};
 
 use axum::{
     body, debug_handler,
@@ -11,13 +11,14 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use axum_extra::{headers::ContentType, TypedHeader};
+use axum_extra::{extract::Query, headers::ContentType, TypedHeader};
 use futures::stream::{self, Stream, StreamExt as _};
 use mime::Mime;
 
 use serde_json::json;
 
 use tokio_stream::wrappers::BroadcastStream;
+use tower_http::services::ServeDir;
 use tracing::{debug, error};
 
 use crate::{
@@ -27,10 +28,16 @@ use crate::{
     state::AppState,
 };
 
-pub fn router(_state: &AppState) -> Router<AppState> {
-    Router::new()
-        .route("/publish", post(publish))
-        .route("/subscribe", get(subscribe))
+pub fn router(state: &AppState) -> Router<AppState> {
+    let mut router = Router::new()
+        .route(&state.pub_path, post(publish))
+        .route(&state.sub_path, get(subscribe));
+
+    if let Some(serve_root_dir) = &state.serve_root_dir {
+        router = router.nest_service("/", ServeDir::new(serve_root_dir))
+    }
+
+    router
 }
 
 fn decode_raw_body(mime: &Mime, raw: &body::Bytes) -> Result<Message, AppError> {
@@ -79,15 +86,39 @@ async fn publish(
     }
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct LastEventIdQuery {
+    last_event_id: Option<String>,
+}
+
 #[debug_handler]
 async fn subscribe(
     State(state): State<AppState>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    Query(LastEventIdQuery { last_event_id }): Query<LastEventIdQuery>,
     axum_req: axum::extract::Request,
-) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+) -> Result<impl IntoResponse, AppError> {
+    // Header takes precedence over query parameter
+    let last_event_id = axum_req
+        .headers()
+        .get("last-event-id")
+        .and_then(|id| id.to_str().ok().map(String::from))
+        .or(last_event_id);
+
     let req = Request::new(addr, &axum_req);
-    let sub_req = SubscribeRequest::new(req);
-    let sub_req = state.script.subscribe(sub_req).await.unwrap().unwrap();
+    let sub_req = SubscribeRequest::new(req, last_event_id);
+
+    match state.script.subscribe(sub_req).await? {
+        Some(sub_req) => Ok(sse_subscribe(state, sub_req).await),
+        None => Err(AppError::Forbidden("subscribe rejected by script".into())),
+    }
+}
+
+async fn sse_subscribe(
+    state: AppState,
+    sub_req: SubscribeRequest,
+) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+    let start = Instant::now();
 
     let events = async_stream::stream! {
         let event_stream = stream::once(async { Ok(Event::default().comment("ok")) }).chain(
@@ -131,15 +162,17 @@ async fn subscribe(
                 },
                 _ = &mut timeout => {
                     yield Ok(Event::default().comment("timeout").retry(state.timeout_retry));
+                    state.script.timeout(&sub_req, &start.elapsed()).await.ok();
                     break;
                 }
             }
         }
+
     };
 
     Sse::new(events).keep_alive(
         KeepAlive::new()
             .interval(state.keep_alive)
-            .text(&state.keep_alive_text),
+            .text(state.keep_alive_text),
     )
 }

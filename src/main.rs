@@ -34,6 +34,8 @@ async fn try_main(cli: &Cli) -> anyhow::Result<()> {
     let state = AppState::from_cli(cli).await?;
     debug!("{state:?}");
 
+    state.script.startup(cli).await?;
+
     let router = Router::new()
         .merge(web::router(&state))
         .layer(

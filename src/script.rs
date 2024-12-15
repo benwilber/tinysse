@@ -1,6 +1,7 @@
-use std::{fs, path::Path};
+use std::{fs, path::Path, time::Duration};
 
 use crate::{
+    cli::Cli,
     req::{PublishRequest, SubscribeRequest},
     userdata,
 };
@@ -123,6 +124,42 @@ impl Script {
         } else {
             Ok(Some(pub_req))
         }
+    }
+
+    pub async fn unsubscribe(&self, sub_req: &SubscribeRequest) -> anyhow::Result<()> {
+        let globals = self.lua.globals();
+
+        if let Ok(unsubscribe_fn) = globals.get::<mlua::Function>("unsubscribe") {
+            unsubscribe_fn.call_async::<()>(sub_req.clone()).await?;
+        }
+
+        Ok(())
+    }
+
+    pub async fn timeout(
+        &self,
+        sub_req: &SubscribeRequest,
+        elapsed: &Duration,
+    ) -> anyhow::Result<()> {
+        let globals = self.lua.globals();
+
+        if let Ok(timeout_fn) = globals.get::<mlua::Function>("timeout") {
+            timeout_fn
+                .call_async::<()>((sub_req.clone(), elapsed.as_millis()))
+                .await?;
+        }
+
+        Ok(())
+    }
+
+    pub async fn startup(&self, cli: &Cli) -> anyhow::Result<()> {
+        let globals = self.lua.globals();
+
+        if let Ok(startup_fn) = globals.get::<mlua::Function>("startup") {
+            startup_fn.call_async::<()>(cli.clone()).await?;
+        }
+
+        Ok(())
     }
 }
 
