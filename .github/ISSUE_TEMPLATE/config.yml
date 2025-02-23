@@ -1,0 +1,6 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Ask a Question
+    about: |
+      You've come to seek help or want to discuss something related to temple.
+    url: https://github.com/benwilber/temple/discussions/new
