@@ -8,7 +8,7 @@ use tower_http::cors::{AllowHeaders, AllowMethods, AllowOrigin};
 use tracing::Level;
 
 /// Tiny SSE
-/// 
+///
 /// A programmable server for Server-Sent Events (SSE).
 #[derive(Debug, Clone, Parser)]
 pub struct Cli {
