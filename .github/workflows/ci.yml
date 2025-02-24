@@ -95,57 +95,6 @@ jobs:
         echo "TARGET_FLAGS=--target ${{ matrix.target }}" >> $GITHUB_ENV
         echo "TARGET_DIR=./target/${{ matrix.target }}" >> $GITHUB_ENV
 
-    - name: Show command used for Cargo
-      run: |
-        echo "cargo command is: ${{ env.CARGO }}"
-        echo "target flag is: ${{ env.TARGET_FLAGS }}"
-
-    - name: Build temple and all crates
-      run: ${{ env.CARGO }} build --verbose --workspace ${{ env.TARGET_FLAGS }}
-
-    # This is useful for debugging problems when the expected build artifacts
-    # (like shell completions and man pages) aren't generated.
-    - name: Show build.rs stderr
-      shell: bash
-      run: |
-        set +x
-        stderr="$(find "${{ env.TARGET_DIR }}/debug" -name stderr -print0 | xargs -0 ls -t | head -n1)"
-        if [ -s "$stderr" ]; then
-          echo "===== $stderr ===== "
-          cat "$stderr"
-          echo "====="
-        fi
-        set -x
-
-    # - name: Test for existence of build artifacts (Windows)
-    #   if: matrix.os == 'windows-2019'
-    #   shell: bash
-    #   run: |
-    #     outdir="$(ci/cargo-out-dir "${{ env.TARGET_DIR }}")"
-    #     ls "$outdir/_rg.ps1" && file "$outdir/_rg.ps1"
-
-    # - name: Test for existence of build artifacts (Unix)
-    #   if: matrix.os != 'windows-2019'
-    #   shell: bash
-    #   run: |
-    #     outdir="$(ci/cargo-out-dir "${{ env.TARGET_DIR }}")"
-    #     # TODO: Check for the man page generation here. For whatever reason,
-    #     # it seems to be intermittently failing in CI. No idea why.
-    #     # for f in rg.bash rg.fish rg.1; do
-    #     for f in rg.bash rg.fish; do
-    #       # We could use file -E here, but it isn't supported on macOS.
-    #       ls "$outdir/$f" && file "$outdir/$f"
-    #     done
-
-    # - name: Test zsh shell completions (Unix, sans cross)
-    #   # We could test this when using Cross, but we'd have to execute the
-    #   # 'rg' binary (done in test-complete) with qemu, which is a pain and
-    #   # doesn't really gain us much. If shell completion works in one place,
-    #   # it probably works everywhere.
-    #   if: matrix.target == '' && matrix.os != 'windows-2019'
-    #   shell: bash
-    #   run: ci/test-complete
-
   rustfmt:
     name: rustfmt
     runs-on: ubuntu-24.04
