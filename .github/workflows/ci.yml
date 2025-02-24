@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     name: test
+    env:
       # Emit backtraces on panics.
       RUST_BACKTRACE: 1
     runs-on: ${{ matrix.os }}
