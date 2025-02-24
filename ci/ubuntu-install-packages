@@ -1,6 +1,12 @@
 #!/bin/sh
 
-sudo apt-get update
-sudo apt-get install -y --no-install-recommends \
+apt-get update
+apt-get install \
+  --assume-yes \
+  --no-install-recommends \
   asciidoctor \
-  zsh xz-utils liblz4-tool musl-tools openssl-dev
+  zsh \
+  xz-utils \
+  liblz4-tool \
+  musl-tools \
+  libssl-dev
