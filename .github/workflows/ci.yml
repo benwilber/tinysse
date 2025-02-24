@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
     branches:
-    - workflows    
+    - main
   schedule:
   - cron: "0 1 * * *"
 jobs:
