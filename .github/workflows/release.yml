@@ -21,6 +21,8 @@ on:
     # - workflows
     tags:
     - "[0-9]+.[0-9]+.[0-9]+"
+permissions:
+  contents: write
 jobs:
   create-release:
     name: create-release
