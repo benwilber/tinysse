@@ -31,6 +31,8 @@ impl AppState {
             script.load_path(path).await?;
         }
 
+        script.register();
+
         let (broadcast, _) = broadcast::channel(cli.capacity);
 
         Ok(Self {

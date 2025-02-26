@@ -94,7 +94,7 @@ async fn publish(
     let msg = decode_raw_body(&content_type.into(), &raw)?;
     let pub_req = PublishRequest::new(req, msg);
 
-    if let Some(pub_req) = state.script.on_publish(pub_req).await? {
+    if let Some(pub_req) = state.script.publish(pub_req).await? {
         let subs = state.broadcast.send(pub_req).unwrap_or(0);
 
         Ok((
@@ -132,10 +132,10 @@ async fn subscribe(
         .or(last_event_id);
 
     let req = Request::new(addr, &axum_req);
-    let sub_req = SubscribeRequest::new(req, last_event_id);
+    let sub_req = SubscribeRequest::new(req, last_event_id.clone());
 
-    match state.script.on_subscribe(sub_req).await? {
-        Some(sub_req) => Ok(sse_subscribe(state, sub_req).await),
+    match state.script.subscribe(sub_req).await? {
+        Some(sub_req) => Ok(sse_subscribe(state, sub_req, last_event_id).await),
         None => Err(AppError::Forbidden("subscribe rejected by script".into())),
     }
 }
@@ -143,6 +143,7 @@ async fn subscribe(
 async fn sse_subscribe(
     state: AppState,
     sub_req: SubscribeRequest,
+    _last_event_id: Option<String>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     let start = Instant::now();
     let keep_alive = state.keep_alive;
@@ -152,7 +153,7 @@ async fn sse_subscribe(
         let event_stream = stream::once(async { Ok(Event::default().comment("ok")) }).chain(
             BroadcastStream::new(state.broadcast.subscribe()).filter_map(|pub_req| async { match pub_req {
                 Ok(pub_req) if !pub_req.msg().is_empty() => {
-                    match state.script.on_message(pub_req, &sub_req).await {
+                    match state.script.message(pub_req, &sub_req).await {
                         Ok(Some(pub_req)) if !pub_req.msg().is_empty() => {
                             Some(Ok(pub_req.msg().clone().into()))
                         },
@@ -198,16 +199,16 @@ async fn sse_subscribe(
                     }
                 },
                 _ = &mut timeout => {
-                    let timeout_retry = match state.script.on_timeout(&sub_req, &start.elapsed()).await {
-                        Ok(Some(timeout_retry)) => Duration::from_millis(timeout_retry as u64),
+                    let retry = match state.script.timeout(&sub_req, &start.elapsed()).await {
+                        Ok(Some(retry)) => Duration::from_millis(retry as u64),
                         Ok(None) => state.timeout_retry,
                         Err(e) => {
-                            error!("{e:?}");
+                            error!("{e}");
                             state.timeout_retry
                         }
                     };
 
-                    yield Ok(Event::default().comment("timeout").retry(timeout_retry));
+                    yield Ok(Event::default().comment("timeout").retry(retry));
                     break;
                 }
             }

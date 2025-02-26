@@ -65,7 +65,15 @@ impl Http {
             .parse()
             .map_err(|_| Self::error("method is invalid"))?;
         let url: url::Url = url.parse().map_err(|_| Self::error("url is invalid"))?;
-        let mut client = reqwest::Client::default().request(method, url);
+        let mut client = reqwest::Client::builder()
+            .user_agent(concat!(
+                env!("CARGO_PKG_NAME"),
+                "/",
+                env!("CARGO_PKG_VERSION")
+            ))
+            .build()
+            .map_err(mlua::Error::external)?
+            .request(method, url);
 
         if let Some(opts) = opts {
             if let Ok(version) = opts.get::<String>("version") {
@@ -85,8 +93,8 @@ impl Http {
             }
 
             if let Ok(headers) = opts.get::<mlua::Table>("headers") {
-                for (key, val) in headers.pairs::<String, String>().flatten() {
-                    client = client.header(key, val);
+                for (name, val) in headers.pairs::<String, String>().flatten() {
+                    client = client.header(name, val);
                 }
             }
 

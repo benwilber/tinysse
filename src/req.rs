@@ -283,7 +283,7 @@ impl Drop for SubscribeRequestGuard<'_> {
         let sub_req = self.sub_req.clone();
 
         tokio::spawn(async move {
-            if let Err(e) = state.script.on_unsubscribe(&sub_req).await {
+            if let Err(e) = state.script.unsubscribe(&sub_req).await {
                 tracing::error!("{e:?}");
             }
         });

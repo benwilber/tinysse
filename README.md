@@ -76,8 +76,8 @@ tinysse --script script.lua
 -- The `uuid` module is built-in to the Tiny SSE server
 local uuid = require "uuid"
 
--- This function is called when a new publish request is received
-function onpublish(pub)
+-- Called when a new publish request is received
+function publish(pub)
   -- Set a unique ID on the publish request.
   -- This can be referenced in the `onmessage(pub, sub)`
   -- function to correlate the publish request with message
@@ -89,7 +89,7 @@ function onpublish(pub)
 
   -- If the publisher did not explicitly set a message ID,
   -- then we can set one here.
-  -- This will be the `id: <id>` in the SSE message.
+  -- This will be the `id: <id>` line in the SSE message.
   if not pub.msg.id then
     pub.msg.id = uuid()
   end
@@ -100,34 +100,35 @@ function onpublish(pub)
   -- Comments too
   pub.msg.comments = {"This is a comment", "Another comment!"}
 
-  -- Return the pub request to the server otherwise it
+  -- Return the pub request to the server or it
   -- it will be rejected and not delivered to any subscribers
   return pub
 end
 
--- This function is called when a new subscriber connects
-function onsubscribe(sub)
+-- Called when a new subscriber connects
+function subscribe(sub)
   -- Set a unique ID on the subscriber.
   sub.id = uuid()
 
-  -- Return the sub request to the server otherwise it
+  -- Return the sub request to the server or it
   -- it will be rejected and the client will be disconnected immediately
   return sub
 end
 
--- This function is called when a message is about to be delivered to a subscriber
-function onmessage(pub, sub)
+-- Called when a message is about to be delivered to a subscriber
+function message(pub, sub)
   -- Log the publish ID and subscriber ID
   print("Publish ID: " .. pub.id)
   print("Subscriber ID: " .. sub.id)
 
-  -- Return the pub request to the server otherwise
-  -- the subscriber will not receive the message (but still remains connected)
+  -- Return the pub request to the server or
+  -- the subscriber will not receive the message
+  -- (but will still remain connected)
   return pub
 end
 
--- This function is called when a subscriber disconnects
-function onunsubscribe(sub)
+-- Called when a subscriber disconnects
+function unsubscribe(sub)
   -- Log the subscriber ID that just left
   print("Unsubscribed: " .. sub.id)
 end

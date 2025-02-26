@@ -65,22 +65,26 @@ async fn try_main(cli: &Cli) -> anyhow::Result<()> {
     let local_addr = listener.local_addr()?;
     info!("Listening on {local_addr}");
 
-    state.script.on_startup(cli).await?;
+    state.script.startup(cli).await?;
 
     tokio::select! {
         _ = async {
             // Run the script tick loop
+            let mut interval = tokio::time::interval(cli.script_tick);
+
+            // The first tick is immediate
+            interval.tick().await;
+
             let mut count = 0;
 
             loop {
                 count += 1;
-                if let Err(e) = state.script.on_tick(count).await {
-                    // Don't crash the server if the script tick fails.
-                    // Just log it.
+
+                if let Err(e) = state.script.tick(count).await {
                     error!("{e}");
                 }
 
-                tokio::time::sleep(cli.script_tick).await;
+                interval.tick().await;
             }
         } => {},
 
