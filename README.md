@@ -111,7 +111,6 @@ end
 
 -- A message is delivered to a subscriber
 function message(pub, sub)
-  -- Print the publish ID, messsage ID, and subscriber ID
   print("Publish ID: " .. pub.id)
   print("Message ID: " .. pub.msg.id)
   print("Subscriber ID: " .. sub.id)
@@ -124,7 +123,6 @@ end
 
 -- A subscriber disconnects
 function unsubscribe(sub)
-  -- Print the subscriber ID that just left
   print("Unsubscribed: " .. sub.id)
 end
 ```
