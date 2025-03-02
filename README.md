@@ -215,13 +215,13 @@ Options:
           [default: 64KB]
 
   -P, --pub-path <URL_PATH>
-          The URL path for publishing messages to subscribers via POST
+          The URL path for publishing messages via POST
           
           [env: TINYSSE_PUB_PATH=]
           [default: /sse]
 
   -S, --sub-path <URL_PATH>
-          The URL path for subscribing to messages from publishers via GET
+          The URL path for subscribing to messages via GET
           
           [env: TINYSSE_SUB_PATH=]
           [default: /sse]
