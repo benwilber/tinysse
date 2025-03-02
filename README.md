@@ -81,8 +81,7 @@ function publish(pub)
   -- We can override the data in the SSE message
   pub.msg.data = "Hello, Universe!"
 
-  -- If the publisher did not explicitly set a message ID,
-  -- then we can set one here.
+  -- If the publisher did not set a message ID, then we can set one here.
   -- This will be the `id: <id>` line in the SSE message.
   if not pub.msg.id then
     pub.msg.id = uuid()
