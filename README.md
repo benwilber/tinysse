@@ -41,7 +41,7 @@ curl http://127.0.0.1:1983/sse
 Publish a message
 
 ```sh
-curl -X POST -d data='Hello, World!' http://127.0.0.1:1983/sse
+curl -X POST -d data="Hello, World" http://127.0.0.1:1983/sse
 ```
 ```
 {"queued":1,"subscribers":1}
@@ -49,13 +49,10 @@ curl -X POST -d data='Hello, World!' http://127.0.0.1:1983/sse
 
 Observe the message received by the subscriber
 
-```sh
-curl http://127.0.0.1:1983/sse
-```
 ```
 : ok
 
-data: Hello, World!
+data: Hello, World
 ...
 ```
 
@@ -70,10 +67,10 @@ tinysse --script script.lua
 ```
 
 ```lua
--- The `uuid` module is built-in to the Tiny SSE server
+-- The `uuid` package is built-in to the Tiny SSE server
 local uuid = require "uuid"
 
--- A new publish request is received
+-- A new message is published
 function publish(pub)
   -- Set a unique ID on the publish request.
   -- This can later be referenced in the `message(pub, sub)`
