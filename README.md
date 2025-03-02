@@ -104,7 +104,7 @@ function subscribe(sub)
   sub.id = uuid()
 
   -- Return the sub request to the server or it
-  -- it will be rejected and the client will be disconnected immediately
+  -- will be rejected and the client will be disconnected immediately
   return sub
 end
 
