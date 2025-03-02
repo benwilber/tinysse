@@ -70,7 +70,7 @@ tinysse --script script.lua
 -- The `uuid` package is built-in to the Tiny SSE server
 local uuid = require "uuid"
 
--- A new message is published
+-- A message is published
 function publish(pub)
   -- Set a unique ID on the publish request.
   -- This can later be referenced in the `message(pub, sub)`
