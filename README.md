@@ -24,7 +24,7 @@ $ tinysse
 ```
 
 ```
-2025-02-23T20:27:52.291799Z  INFO tinysse: Listening on 127.0.0.1:1983
+INFO tinysse: Listening on 127.0.0.1:1983
 
 ```
 
