@@ -63,7 +63,7 @@ Make a Lua script `script.lua`
 Run the server with the script
 
 ```sh
-tinysse --script script.lua
+$ tinysse --script script.lua
 ```
 
 ```lua
