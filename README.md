@@ -28,7 +28,7 @@ INFO tinysse: Listening on 127.0.0.1:1983
 
 ```
 
-Start a subscriber
+1) Start a subscriber
 
 ```sh
 curl http://127.0.0.1:1983/sse
@@ -38,7 +38,7 @@ curl http://127.0.0.1:1983/sse
 ...
 ```
 
-Publish a message
+2) Publish a message
 
 ```sh
 curl -X POST -d data="Hello, World" http://127.0.0.1:1983/sse
@@ -47,7 +47,7 @@ curl -X POST -d data="Hello, World" http://127.0.0.1:1983/sse
 {"queued":1,"subscribers":1}
 ```
 
-Observe the message received by the subscriber
+3) Observe the message received by the subscriber
 
 ```
 : ok
