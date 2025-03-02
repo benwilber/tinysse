@@ -94,7 +94,7 @@ function publish(pub)
   pub.msg.comment = {"This is a comment", "Another comment!"}
 
   -- Return the pub request to the server or it
-  -- it will be rejected and not delivered to any subscribers
+  -- will be rejected and not delivered to any subscribers
   return pub
 end
 
