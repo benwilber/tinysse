@@ -38,8 +38,8 @@ pub fn router(state: &AppState) -> Router<AppState> {
         .route(&state.sub_path, get(subscribe));
 
     // Serve static files from the specified directory.
-    if let Some(serve_root_dir) = &state.serve_root_dir {
-        router = router.nest_service("/", ServeDir::new(serve_root_dir))
+    if let Some(serve_static_dir) = &state.serve_static_dir {
+        router = router.nest_service(&state.serve_static_path, ServeDir::new(serve_static_dir))
     }
 
     router

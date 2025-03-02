@@ -208,7 +208,7 @@ Options:
           
           [env: TINYSSE_UNSAFE_SCRIPT=]
 
-  -M, --max-body-size <BYTES>
+  -m, --max-body-size <BYTES>
           The maximum size of the publish request body that the server will accept (e.g., 32KB, 1MB)
           
           [env: TINYSSE_MAX_BODY_SIZE=]
@@ -226,10 +226,16 @@ Options:
           [env: TINYSSE_SUB_PATH=]
           [default: /sse]
 
-  -D, --serve-root-dir <DIR_PATH>
-          Serve static files from the specified directory under the root (/) URL path
+  -D, --serve-static-dir <DIR_PATH>
+          Serve static files from the specified directory under the path specified by `--serve-static-path`
           
-          [env: TINYSSE_SERVE_ROOT_DIR=]
+          [env: TINYSSE_SERVE_STATIC_DIR=]
+
+  -U, --serve-static-path <URL_PATH>
+          The URL path under which to serve static files from the directory specified by `--serve-static-dir`
+          
+          [env: TINYSSE_SERVE_STATIC_PATH=]
+          [default: /]
 
       --cors-allow-origin <ORIGINS>
           Set Access-Control-Allow-Origin header to the specified origin(s)

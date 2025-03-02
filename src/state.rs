@@ -16,7 +16,8 @@ pub struct AppState {
     pub max_body_size: ByteSize,
     pub pub_path: String,
     pub sub_path: String,
-    pub serve_root_dir: Option<PathBuf>,
+    pub serve_static_dir: Option<PathBuf>,
+    pub serve_static_path: String,
 }
 
 impl AppState {
@@ -45,7 +46,8 @@ impl AppState {
             max_body_size: cli.max_body_size,
             pub_path: cli.pub_path.clone(),
             sub_path: cli.sub_path.clone(),
-            serve_root_dir: cli.serve_root_dir.clone(),
+            serve_static_dir: cli.serve_static_dir.clone(),
+            serve_static_path: cli.serve_static_path.clone(),
         })
     }
 }

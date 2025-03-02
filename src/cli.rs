@@ -127,7 +127,7 @@ pub struct Cli {
     pub unsafe_script: bool,
 
     #[clap(
-        short = 'M',
+        short = 'm',
         long,
         value_name = "BYTES",
         default_value = "64KB",
@@ -160,10 +160,20 @@ pub struct Cli {
         short = 'D',
         long,
         value_name = "DIR_PATH",
-        env = "TINYSSE_SERVE_ROOT_DIR",
-        help = "Serve static files from the specified directory under the root (/) URL path"
+        env = "TINYSSE_SERVE_STATIC_DIR",
+        help = "Serve static files from the specified directory under the path specified by `--serve-static-path`"
     )]
-    pub serve_root_dir: Option<PathBuf>,
+    pub serve_static_dir: Option<PathBuf>,
+
+    #[clap(
+        short = 'U',
+        long,
+        value_name = "URL_PATH",
+        default_value = "/",
+        env = "TINYSSE_SERVE_STATIC_PATH",
+        help = "The URL path under which to serve static files from the directory specified by `--serve-static-dir`"
+    )]
+    pub serve_static_path: String,
 
     #[clap(
         long,
@@ -235,11 +245,12 @@ impl mlua::IntoLua for Cli {
         tbl.set("pub_path", self.pub_path)?;
         tbl.set("sub_path", self.sub_path)?;
         tbl.set(
-            "serve_root_dir",
-            self.serve_root_dir
+            "serve_static_dir",
+            self.serve_static_dir
                 .as_ref()
                 .map(|p| p.to_string_lossy().into_owned()),
         )?;
+        tbl.set("serve_static_path", self.serve_static_path)?;
 
         lua.to_value(&tbl)
     }
