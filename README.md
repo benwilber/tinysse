@@ -158,8 +158,7 @@ Options:
           [default: 60s]
 
   -K, --keep-alive-text <TEXT>
-          The text content of the keep-alive messages sent to clients.
-          This text helps clients recognize keep-alive messages and avoid treating them as real events
+          The text of the keep-alive comments sent to clients.
           
           [env: TINYSSE_KEEP_ALIVE_TEXT=]
           [default: keep-alive]
