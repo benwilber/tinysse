@@ -9,8 +9,7 @@ pub struct Message {
     pub id: Option<String>,
     pub event: Option<String>,
     pub data: Option<String>,
-    #[serde(rename = "comment")]
-    pub comments: Option<Vec<String>>,
+    pub comment: Option<Vec<String>>,
     pub retry: Option<u64>,
 }
 
@@ -19,7 +18,7 @@ impl Message {
         self.id.is_none()
             && self.event.is_none()
             && self.data.is_none()
-            && self.comments.as_ref().is_none_or(|c| c.is_empty())
+            && self.comment.as_ref().is_none_or(|c| c.is_empty())
             && self.retry.is_none()
     }
 }
@@ -42,8 +41,8 @@ impl mlua::FromLua for Message {
                     msg.data = data;
                 }
 
-                if let Ok(comments) = tbl.get("comments") {
-                    msg.comments = comments;
+                if let Ok(comment) = tbl.get("comment") {
+                    msg.comment = comment;
                 }
 
                 if let Ok(retry) = tbl.get("retry") {
@@ -77,9 +76,9 @@ impl mlua::IntoLua for Message {
             tbl.set("data", data)?;
         }
 
-        if let Some(comments) = self.comments {
+        if let Some(comments) = self.comment {
             if !comments.is_empty() {
-                tbl.set("comments", comments)?;
+                tbl.set("comment", comments)?;
             }
         }
 
@@ -107,7 +106,7 @@ impl From<Message> for Event {
             event = event.data(data);
         }
 
-        if let Some(comments) = msg.comments {
+        if let Some(comments) = msg.comment {
             for comment in comments {
                 event = event.comment(comment);
             }

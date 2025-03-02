@@ -15,7 +15,7 @@ use axum::{
     routing::{get, post},
 };
 use axum_extra::{TypedHeader, extract::Query, headers::ContentType};
-use futures::stream::{self, Stream, StreamExt as _};
+use futures::stream::{self, Stream, StreamExt};
 use mime::Mime;
 
 use serde_json::json;
@@ -33,11 +33,6 @@ use crate::{
 
 /// Builds the axum router for the application.
 pub fn router(state: &AppState) -> Router<AppState> {
-    debug!(
-        "pub_path = {}, sub_path = {}",
-        &state.pub_path, &state.sub_path
-    );
-
     let mut router = Router::new()
         .route(&state.pub_path, post(publish))
         .route(&state.sub_path, get(subscribe));
@@ -146,12 +141,13 @@ async fn sse_subscribe(
     _last_event_id: Option<String>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     let start = Instant::now();
-    let keep_alive = state.keep_alive;
-    let keep_alive_text = state.keep_alive_text.clone();
+    let keep_alive = KeepAlive::new()
+        .interval(state.keep_alive)
+        .text(state.keep_alive_text.clone());
 
     let events = async_stream::stream! {
         let event_stream = stream::once(async { Ok(Event::default().comment("ok")) }).chain(
-            BroadcastStream::new(state.broadcast.subscribe()).filter_map(|pub_req| async { match pub_req {
+            BroadcastStream::new(state.broadcast.subscribe()).filter_map(async |pub_req| { match pub_req {
                 Ok(pub_req) if !pub_req.msg().is_empty() => {
                     match state.script.message(pub_req, &sub_req).await {
                         Ok(Some(pub_req)) if !pub_req.msg().is_empty() => {
@@ -185,7 +181,6 @@ async fn sse_subscribe(
             // Effectively no timeout
             tokio::time::sleep(Duration::from_millis(u64::MAX))
         };
-
         tokio::pin!(timeout);
 
         // Unsubscribe on guard drop
@@ -217,5 +212,5 @@ async fn sse_subscribe(
         // _guard dropped here. Unsubscribe called.
     };
 
-    Sse::new(events).keep_alive(KeepAlive::new().interval(keep_alive).text(keep_alive_text))
+    Sse::new(events).keep_alive(keep_alive)
 }

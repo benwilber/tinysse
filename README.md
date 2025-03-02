@@ -6,15 +6,12 @@ A programmable server for Server-Sent Events (SSE).
 ## Features
 
 
-- **Efficient Event Broadcasting** – Supports high-throughput message distribution with minimal latency. (tested to > 100,000/second)
-- **Customizable Event Routing** – Use Lua scripts to filter, modify, or redirect messages dynamically.
-- **Multi-Channel Support** – Clients can subscribe to specific channels for targeted event delivery.
-- **On-the-Fly Message Transformation** – Modify incoming and outgoing events using Lua before they reach subscribers.
+- **Customizable Event Routing and Transformation** – Filter, modify, or redirect messages dynamically.
 - **Stateful Connection Tracking** – Keep track of active subscribers and their connection state.
 - **Graceful Connection Recovery** – Built-in reconnection strategy using `retry` instructions for better reliability.
-- **Pluggable Authentication Hooks** – Use Lua to enforce authentication rules for subscriptions and publishing.
-- **Event History & Replay** – Store and replay recent messages for late joiners (via Lua).
-- **Access Control via Lua** – Dynamically allow or deny access to certain events based on request properties.
+- **Pluggable Authentication Hooks** – Enforce authentication rules for subscriptions and publishing.
+- **Event History & Replay** – Store and replay recent messages for late joiners.
+- **Access Control** – Dynamically allow or deny access to certain events based on request properties.
 
 
 ## Examples
@@ -62,7 +59,7 @@ data: Hello, World!
 ...
 ```
 
-## Whirlwind Tour
+## A Whirlwind Tour
 
 Make a Lua script `script.lua`
 
@@ -76,10 +73,10 @@ tinysse --script script.lua
 -- The `uuid` module is built-in to the Tiny SSE server
 local uuid = require "uuid"
 
--- Called when a new publish request is received
+-- A new publish request is received
 function publish(pub)
   -- Set a unique ID on the publish request.
-  -- This can be referenced in the `onmessage(pub, sub)`
+  -- This can later be referenced in the `message(pub, sub)`
   -- function to correlate the publish request with message
   -- delivery to subscribers
   pub.id = uuid()
@@ -98,14 +95,14 @@ function publish(pub)
   pub.msg.event = "custom-event"
 
   -- Comments too
-  pub.msg.comments = {"This is a comment", "Another comment!"}
+  pub.msg.comment = {"This is a comment", "Another comment!"}
 
   -- Return the pub request to the server or it
   -- it will be rejected and not delivered to any subscribers
   return pub
 end
 
--- Called when a new subscriber connects
+-- A new subscriber connects
 function subscribe(sub)
   -- Set a unique ID on the subscriber.
   sub.id = uuid()
@@ -115,21 +112,22 @@ function subscribe(sub)
   return sub
 end
 
--- Called when a message is about to be delivered to a subscriber
+-- A message is delivered to a subscriber
 function message(pub, sub)
-  -- Log the publish ID and subscriber ID
+  -- Print the publish ID, messsage ID, and subscriber ID
   print("Publish ID: " .. pub.id)
+  print("Message ID: " .. pub.msg.id)
   print("Subscriber ID: " .. sub.id)
 
   -- Return the pub request to the server or
   -- the subscriber will not receive the message
-  -- (but will still remain connected)
+  -- (but will still remain connected for subsequent messages)
   return pub
 end
 
--- Called when a subscriber disconnects
+-- A subscriber disconnects
 function unsubscribe(sub)
-  -- Log the subscriber ID that just left
+  -- Print the subscriber ID that just left
   print("Unsubscribed: " .. sub.id)
 end
 ```
@@ -138,6 +136,7 @@ end
 ## Usage
 
 ```sh
+$ tinysse --help
 Tiny SSE
 
 A programmable server for Server-Sent Events (SSE).
@@ -166,7 +165,8 @@ Options:
 
   -K, --keep-alive-text <TEXT>
           The text content of the keep-alive messages sent to clients.
-                    
+          This text helps clients recognize keep-alive messages and avoid treating them as real events
+          
           [env: TINYSSE_KEEP_ALIVE_TEXT=]
           [default: keep-alive]
 
@@ -269,7 +269,6 @@ Options:
 
   -h, --help
           Print help (see a summary with '-h')
-
 ```
 
 ## Contributing to Tiny SSE

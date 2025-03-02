@@ -13,6 +13,9 @@ function subscribe(sub)
     return sub
 end
 
+function catchup(sub, last_event_id)
+end
+
 function message(pub, sub)
     return pub
 end
