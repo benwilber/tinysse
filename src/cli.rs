@@ -142,7 +142,7 @@ pub struct Cli {
         value_name = "URL_PATH",
         default_value = "/sse",
         env = "TINYSSE_PUB_PATH",
-        help = "The URL path for publishing messages to subscribers via POST"
+        help = "The URL path for publishing messages via POST"
     )]
     pub pub_path: String,
 
@@ -152,7 +152,7 @@ pub struct Cli {
         value_name = "URL_PATH",
         default_value = "/sse",
         env = "TINYSSE_SUB_PATH",
-        help = "The URL path for subscribing to messages from publishers via GET"
+        help = "The URL path for subscribing to messages via GET"
     )]
     pub sub_path: String,
 
