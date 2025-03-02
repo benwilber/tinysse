@@ -190,7 +190,7 @@ Options:
           [env: TINYSSE_SCRIPT=]
 
       --script-data <DATA>
-          Optional data to pass to the Lua script as the `cli.script_data` value in the `startup(cli)` function
+          Optional data to pass to the Lua script as the `opts.script_data` value in the `startup(opts)` function
           
           [env: TINYSSE_SCRIPT_DATA=]
 

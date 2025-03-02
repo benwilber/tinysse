@@ -1,5 +1,5 @@
 
-function startup(cli)
+function startup(opts)
 end
 
 function tick(count)
