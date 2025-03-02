@@ -110,9 +110,9 @@ end
 
 -- A message is delivered to a subscriber
 function message(pub, sub)
-  print("Publish ID: " .. pub.id)
-  print("Message ID: " .. pub.msg.id)
-  print("Subscriber ID: " .. sub.id)
+  print("Publish ID:", pub.id)
+  print("Message ID:", pub.msg.id)
+  print("Subscriber ID:", sub.id)
 
   -- Return the pub request to the server or
   -- the subscriber will not receive the message
@@ -122,7 +122,7 @@ end
 
 -- A subscriber disconnects
 function unsubscribe(sub)
-  print("Unsubscribed: " .. sub.id)
+  print("Unsubscribed:", sub.id)
 end
 ```
 
