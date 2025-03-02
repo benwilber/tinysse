@@ -191,13 +191,13 @@ Options:
           [env: TINYSSE_SCRIPT=]
 
       --script-data <DATA>
-          Optional data to pass to the Lua script as the `cli.script_data` value in the `onstartup(cli)` function
+          Optional data to pass to the Lua script as the `cli.script_data` value in the `startup(cli)` function
           
           [env: TINYSSE_SCRIPT_DATA=]
 
       --script-tick <INTERVAL>
           The interval between Lua script ticks (e.g., 1s, 500ms). The script tick is a periodic event that allows the Lua script to perform
-          background tasks in the `ontick(count)` function
+          background tasks in the `tick(count)` function
           
           [env: TINYSSE_SCRIPT_TICK=]
           [default: 500ms]

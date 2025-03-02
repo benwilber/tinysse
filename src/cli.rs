@@ -103,7 +103,7 @@ pub struct Cli {
         long,
         value_name = "DATA",
         env = "TINYSSE_SCRIPT_DATA",
-        help = "Optional data to pass to the Lua script as the `cli.script_data` value in the `onstartup(cli)` function"
+        help = "Optional data to pass to the Lua script as the `cli.script_data` value in the `startup(cli)` function"
     )]
     pub script_data: Option<String>,
 
@@ -113,7 +113,7 @@ pub struct Cli {
         default_value = "500ms",
         value_parser = parse_duration,
         env = "TINYSSE_SCRIPT_TICK",
-        help = "The interval between Lua script ticks (e.g., 1s, 500ms). The script tick is a periodic event that allows the Lua script to perform background tasks in the `ontick(count)` function"
+        help = "The interval between Lua script ticks (e.g., 1s, 500ms). The script tick is a periodic event that allows the Lua script to perform background tasks in the `tick(count)` function"
     )]
     pub script_tick: Duration,
 
