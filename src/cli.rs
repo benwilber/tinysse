@@ -62,7 +62,7 @@ pub struct Cli {
         value_parser = parse_duration,
         env = "TINYSSE_TIMEOUT",
         help = "The timeout duration for subscriber connections (e.g., 5m, 300s, 10m).\n\
-                Connections subscribed for longer than this duration will be closed"
+                Connections open for longer than this duration will be closed"
     )]
     pub timeout: Duration,
 

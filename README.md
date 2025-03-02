@@ -165,7 +165,7 @@ Options:
 
   -t, --timeout <TIMEOUT>
           The timeout duration for subscriber connections (e.g., 5m, 300s, 10m).
-          Connections subscribed for longer than this duration will be closed
+          Connections open for longer than this duration will be closed
           
           [env: TINYSSE_TIMEOUT=]
           [default: 5m]
