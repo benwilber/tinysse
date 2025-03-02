@@ -158,7 +158,7 @@ Options:
           [default: 60s]
 
   -K, --keep-alive-text <TEXT>
-          The text of the keep-alive comments sent to clients.
+          The text of the keep-alive comment sent to clients.
           
           [env: TINYSSE_KEEP_ALIVE_TEXT=]
           [default: keep-alive]

@@ -50,7 +50,7 @@ pub struct Cli {
         value_name = "TEXT",
         default_value = "keep-alive",
         env = "TINYSSE_KEEP_ALIVE_TEXT",
-        help = "The text of the keep-alive comments sent to clients."
+        help = "The text of the keep-alive comment sent to clients."
     )]
     pub keep_alive_text: String,
 
