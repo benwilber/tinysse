@@ -42,12 +42,9 @@ impl mlua::UserData for Sleep {
         /// # Returns
         /// This method does not return a value. After the specified delay, it resumes
         /// execution in Lua.
-        methods.add_async_meta_method(
-            mlua::MetaMethod::Call,
-            |_lua, _this, millis: f64| async move {
-                tokio::time::sleep(std::time::Duration::from_millis(millis as u64)).await;
-                Ok(())
-            },
-        );
+        methods.add_async_meta_method(mlua::MetaMethod::Call, async |_lua, _this, millis: f64| {
+            tokio::time::sleep(std::time::Duration::from_millis(millis as u64)).await;
+            Ok(())
+        });
     }
 }
