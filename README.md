@@ -15,6 +15,7 @@ A programmable server for Server-Sent Events (SSE).
 
 - [Features](#features)
 - [Installation](#installation)
+  - [Homebrew](#homebrew)
   - [Building](#building)
 - [Examples](#examples)
   - [Basic Pub/Sub server](#basic-pubsub-server)
@@ -43,7 +44,7 @@ A programmable server for Server-Sent Events (SSE).
 
 [Archives of binary releases](https://github.com/benwilber/tinysse/releases) are available for Linux, macOS, and Windows.
 
-## Homebrew (macOS)
+### Homebrew (macOS)
 
 ```sh
 brew tap benwilber/tinysse
