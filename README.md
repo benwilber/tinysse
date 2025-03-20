@@ -15,7 +15,7 @@ A programmable server for Server-Sent Events (SSE).
 
 - [Features](#features)
 - [Installation](#installation)
-  - [Homebrew](#homebrew)
+  - [Homebrew](#homebrew-macos)
   - [Building](#building)
 - [Examples](#examples)
   - [Basic Pub/Sub server](#basic-pubsub-server)
