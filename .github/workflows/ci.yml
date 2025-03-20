@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  ci:
+    name: CI - ${{ matrix.platform.os-name }}
+    strategy:
+      matrix:
+        platform:
+          - os-name: linux-x86_64-gnu
+            runs-on: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+
+          - os-name: linux-aarch64-gnu
+            runs-on: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+
+          - os-name: linux-x86_64-musl
+            runs-on: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+
+          - os-name: linux-aarch64-musl
+            runs-on: ubuntu-latest
+            target: aarch64-unknown-linux-musl
+
+          - os-name: windows-x86_64-msvc
+            runs-on: windows-latest
+            target: x86_64-pc-windows-msvc
+
+          - os-name: windows-aarch64-msvc
+            runs-on: windows-latest
+            target: aarch64-pc-windows-msvc
+
+          - os-name: macos-x86_64
+            runs-on: macOS-latest
+            target: x86_64-apple-darwin
+
+          - os-name: macos-aarch64
+            runs-on: macOS-latest
+            target: aarch64-apple-darwin
+
+    runs-on: ${{ matrix.platform.runs-on }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Rust format
+        run: cargo fmt -- --check
+
+      - name: Run Rust checks
+        run: cargo check
+
+      - name: Run tests
+        if: "matrix.platform.target != 'aarch64-pc-windows-msvc'"
+        uses: houseabsolute/actions-rust-cross@v1
+        with:
+          command: test
+          target: ${{ matrix.platform.target }}
