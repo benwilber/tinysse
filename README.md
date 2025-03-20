@@ -43,6 +43,14 @@ A programmable server for Server-Sent Events (SSE).
 
 [Archives of binary releases](https://github.com/benwilber/tinysse/releases) are available for Linux, macOS, and Windows.
 
+## Homebrew (macOS)
+
+```sh
+brew tap benwilber/tinysse
+brew install benwilber/tinysse/tinysse-bin
+tinysse --help
+```
+
 ### Building
 
 The project can be built with the standard Rust/Cargo toolchain:
