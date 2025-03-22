@@ -137,15 +137,34 @@ async fn subscribe(
 async fn sse_subscribe(
     state: AppState,
     sub_req: SubReq,
-    _last_event_id: Option<String>,
+    last_event_id: Option<String>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     let start = Instant::now();
     let keep_alive = KeepAlive::new()
         .interval(state.keep_alive)
         .text(state.keep_alive_text.clone());
 
+    let catchup_msgs = if let Some(last_event_id) = last_event_id {
+        state
+            .script
+            .catchup(&sub_req, &last_event_id)
+            .await
+            .ok()
+            .flatten()
+            .unwrap_or_default()
+    } else {
+        Vec::new()
+    };
+    let catchup_stream = stream::iter(catchup_msgs.into_iter().filter_map(|msg| {
+        if !msg.is_empty() {
+            Some(Ok(msg.into()))
+        } else {
+            None
+        }
+    }));
+
     let events = async_stream::stream! {
-        let event_stream = stream::once(async { Ok(Event::default().comment("ok")) }).chain(
+        let event_stream = stream::once(async { Ok(Event::default().comment("ok")) }).chain(catchup_stream).chain(
             BroadcastStream::new(state.broadcast.subscribe()).filter_map(async |pub_req| { match pub_req {
                 Ok(pub_req) if !pub_req.msg().is_empty() => {
                     match state.script.message(pub_req, &sub_req).await {

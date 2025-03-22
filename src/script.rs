@@ -144,12 +144,12 @@ impl Script {
 
     pub async fn catchup(
         &self,
-        sub_req: SubReq,
-        last_event_id: String,
+        sub_req: &SubReq,
+        last_event_id: &str,
     ) -> anyhow::Result<Option<Vec<Msg>>> {
         if let Ok(func) = self.lua.named_registry_value::<mlua::Function>("catchup") {
             return Ok(func
-                .call_async::<Option<Vec<Msg>>>((sub_req, last_event_id))
+                .call_async::<Option<Vec<Msg>>>((sub_req.clone(), last_event_id))
                 .await?);
         }
 
