@@ -376,6 +376,7 @@ Called immediately after a client subscribes. If the client provides a Last-Even
 
 ```lua
 function catchup(sub, last_event_id)
+  -- last_event_id might be nil if the client did not provide it
   local msgs = {}
 
   -- For instance, "catch-up" subscriber with the 10 most recent messages
