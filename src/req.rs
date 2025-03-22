@@ -201,25 +201,16 @@ impl mlua::IntoLua for PubReq {
 #[derive(Debug, Clone)]
 pub struct SubReq {
     req: Req,
-    last_event_id: Option<String>,
     meta: Option<mlua::Table>,
 }
 
 impl SubReq {
-    pub fn new(req: Req, last_event_id: Option<String>) -> Self {
-        Self {
-            req,
-            last_event_id,
-            meta: None,
-        }
+    pub fn new(req: Req) -> Self {
+        Self { req, meta: None }
     }
 
     pub fn req(&self) -> &Req {
         &self.req
-    }
-
-    pub fn last_event_id(&self) -> Option<&str> {
-        self.last_event_id.as_deref()
     }
 
     pub fn meta(&self) -> Option<&mlua::Table> {
@@ -234,12 +225,8 @@ impl mlua::FromLua for SubReq {
                 let req = tbl.get("req")?;
                 tbl.set("req", mlua::Value::Nil)?;
 
-                let last_event_id = tbl.get("last_event_id")?;
-                tbl.set("last_event_id", mlua::Value::Nil)?;
-
                 Ok(Self {
                     req,
-                    last_event_id,
                     meta: Some(tbl.to_owned()),
                 })
             }
@@ -258,9 +245,7 @@ impl mlua::IntoLua for SubReq {
             Some(tbl) => tbl,
             None => lua.create_table()?,
         };
-
         tbl.set("req", self.req)?;
-        tbl.set("last_event_id", self.last_event_id)?;
 
         lua.to_value(&tbl)
     }
