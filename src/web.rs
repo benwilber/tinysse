@@ -106,7 +106,7 @@ async fn publish(
     }
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 struct LastEventIdQuery {
     last_event_id: Option<String>,
 }
@@ -126,7 +126,7 @@ async fn subscribe(
         .or(last_event_id);
 
     let req = Req::new(addr, &axum_req);
-    let sub_req = SubReq::new(req, last_event_id.clone());
+    let sub_req = SubReq::new(req);
 
     match state.script.subscribe(sub_req).await? {
         Some(sub_req) => Ok(sse_subscribe(state, sub_req, last_event_id).await),
@@ -144,17 +144,13 @@ async fn sse_subscribe(
         .interval(state.keep_alive)
         .text(state.keep_alive_text.clone());
 
-    let catchup_msgs = if let Some(last_event_id) = last_event_id {
-        state
-            .script
-            .catchup(&sub_req, &last_event_id)
-            .await
-            .ok()
-            .flatten()
-            .unwrap_or_default()
-    } else {
-        Vec::new()
-    };
+    let catchup_msgs = state
+        .script
+        .catchup(&sub_req, last_event_id)
+        .await
+        .ok()
+        .flatten()
+        .unwrap_or_default();
     let catchup_stream = stream::iter(catchup_msgs.into_iter().filter_map(|msg| {
         if !msg.is_empty() {
             Some(Ok(msg.into()))

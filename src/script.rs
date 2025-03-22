@@ -145,7 +145,7 @@ impl Script {
     pub async fn catchup(
         &self,
         sub_req: &SubReq,
-        last_event_id: &str,
+        last_event_id: Option<String>,
     ) -> anyhow::Result<Option<Vec<Msg>>> {
         if let Ok(func) = self.lua.named_registry_value::<mlua::Function>("catchup") {
             return Ok(func
