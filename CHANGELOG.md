@@ -1,3 +1,7 @@
+0.4.0 (2025-03-22)
+===================
+* Always call `catchup(sub, last_event_id)` even if last_event_id is `nil`
+
 0.3.1 (2025-03-22)
 ===================
 * Add --version flag to CLI and bump version to 0.3.1
