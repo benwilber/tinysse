@@ -25,13 +25,14 @@ A programmable server for Server-Sent Events (SSE).
     - [SSE message fields](#sse-message-fields)
   - [Subscribing to messages](#subscribing-to-messages)
 - [Lua API](#lua-api)
-  - [startup(cli)](#startupcli)
-  - [tick(count)](#tickcount)
-  - [publish(pub)](#publishpub)
-  - [subscribe(sub)](#subscribesub)
-  - [message(pub, sub)](#messagepub-sub)
-  - [unsubscribe(sub)](#unsubscribesub)
-  - [timeout(sub, elapsed)](#timeoutsub-elapsed)
+  - [`startup(cli)`](#startupcli)
+  - [`tick(count)`](#tickcount)
+  - [`publish(pub)`](#publishpub)
+  - [`subscribe(sub)`](#subscribesub)
+  - [`catchup(sub, last_event_id)`](#catchupsub-last_event_id)
+  - [`message(pub, sub)`](#messagepub-sub)
+  - [`unsubscribe(sub)`](#unsubscribesub)
+  - [`timeout(sub, elapsed)`](#timeoutsub-elapsed)
 - [Lua API Built-ins](BUILTINS.md)
 - [Usage](#usage)
 - [Contributing to Tiny SSE](#contributing-to-tiny-sse)
@@ -257,7 +258,7 @@ The server can function as just a simple SSE pub/sub server without using the Lu
 
 The program runs in a single Lua context for the lifetime of the server so that a global state is shared across the various function calls.
 
-### startup(cli)
+### `startup(cli)`
 
 This is the first function called by the server immediately after it
 begins listening on the configured address and port (default: `127.0.0.1:1983`) and
@@ -288,7 +289,7 @@ function startup(cli)
 end
 ```
 
-### tick(count)
+### `tick(count)`
 
 A periodic event that allows the Lua script to "wake up" and perform background tasks at regular intervals (default `500ms`).  It provides a single argument `count` which is the number of times the tick function has been invoked (including the current) since the server started.
 
@@ -298,7 +299,7 @@ function tick(count)
 end
 ```
 
-### publish(pub)
+### `publish(pub)`
 
 Called when a client wants to publish a message.  It provides a single argument `pub` which is a Lua table containing context of the publish request.  The function is free to modify the request however it needs, but it must return it (modified or not) to the server or the publish request will be rejected with a `403 Forbidden` error and the message will not be delivered to any subscribers.
 
@@ -335,7 +336,7 @@ function publish(pub)
 end
 ```
 
-### subscribe(sub)
+### `subscribe(sub)`
 
 Called when a new subscriber connects.  It provides a single argument `sub` which is a Lua table containing context of the subscribe request.  The function is free to modify the request however it needs, but it must return it (modified or not) to the server or the connection will be rejected with a `403 Forbidden` error and the client will be disconnected immediately.
 
@@ -367,7 +368,30 @@ function subscribe(sub)
 end
 ```
 
-### message(pub, sub)
+### `catchup(sub, last_event_id)`
+
+Called immediately after subscribe when the client includes a Last-Event-ID either as a request header `Last-Event-ID:` or a query parameter `?last_event_id=`.  When both are given the header will take precedence.  This function is expected to return an array table of SSE messages to "catch-up" the subscriber with any messages they might have missed due to reconnection, or just recent history.
+
+**NOTE:** The `message(pub, sub)` function will not be called for messages delivered from the `catchup(sub, last_event_id)` function.
+
+```lua
+function catchup(sub, last_event_id)
+  local msgs = {}
+
+  -- For instance, "catch-up" subscriber with the 10 most recent messages
+  for i=1,10 do
+    table.insert(msgs, {
+      id = "some-id-" .. i,
+      event = "some-event",
+      data = "some data"
+    })
+  end
+
+  return msgs
+end
+```
+
+### `message(pub, sub)`
 
 Called before delivering a message to a subscriber. Receives `pub` and `sub`, the tables returned from the `publish` and `subscribe` functions. Modifications to these tables affect only this subscriber, not others receiving the same message. Typically used for routing and subscriber-specific adjustments.
 
@@ -384,7 +408,7 @@ function message(pub, sub)
 end
 ```
 
-### unsubscribe(sub)
+### `unsubscribe(sub)`
 
 Called when a subscriber disconnects.  The server provides a single argument `sub` which is the Lua table returned from the `subscribe` function.  It does not accept any return value.
 
@@ -394,7 +418,7 @@ function unsubscribe(sub)
 end
 ```
 
-### timeout(sub, elapsed)
+### `timeout(sub, elapsed)`
 
 Called when a subscriber disconnects as result of an SSE timeout.  The server provides two arguments, `sub` and `elapsed`.  `sub` is the table returned from the `subscribe` function, and `elapsed` is the total milliseconds that the subscriber was connected.  The server accepts an optional return value which is the number of milliseconds that the client should wait before reconnecting.  If not given, it will default to the value given by the `--timeout-retry` option.
 
