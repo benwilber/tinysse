@@ -370,9 +370,9 @@ end
 
 ### `catchup(sub, last_event_id)`
 
-Called immediately after subscribe when the client includes a Last-Event-ID either as a request header `Last-Event-ID:` or a query parameter `?last_event_id=`.  When both are given the header will take precedence.  This function is expected to return an array table of SSE messages to "catch-up" the subscriber with any messages they might have missed due to reconnection, or just recent history.
+Called immediately after a client subscribes. If the client provides a Last-Event-ID, either through the `Last-Event-ID:` request header or as a query parameter (`?last_event_id=`), this function should attempt to retrieve missed messages. If both are provided, the header takes precedence. The function may return `nil` or an array of SSE messages to "catch up" the subscriber with any messages they may have missed due to reconnection or to provide recent message history. If `last_event_id` is `nil` or no messages are available, the function may return `nil` instead of an empty array.
 
-**NOTE:** The `message(pub, sub)` function will not be called for messages delivered from the `catchup(sub, last_event_id)` function.
+**NOTE:** The `message(pub, sub)` function **will not** be called for messages delivered from the `catchup(sub, last_event_id)` function.
 
 ```lua
 function catchup(sub, last_event_id)
