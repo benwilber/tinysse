@@ -23,6 +23,7 @@ impl Script {
 
     pub fn unsafe_new() -> Self {
         let script = Self {
+            // SAFETY: The user has explicitly requested an unsafe Lua context.
             lua: unsafe { mlua::Lua::unsafe_new() },
         };
         script.init();
