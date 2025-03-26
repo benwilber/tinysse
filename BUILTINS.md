@@ -14,6 +14,7 @@ The Tiny SSE server comes with several built-in packages.
 - [`sqlite` (EXPERIMENTAL) - Use an embedded database](#sqlite-experimental)
 - [`sleep` Pause script execution](#sleep)
 - [`mutex` Lock concurrent operations](#mutex)
+- [`fernet` Easy, safe symmetric encryption](#fernet)
 
 ## `uuid`
 
@@ -360,3 +361,20 @@ end)
 ```
 
 **NOTE:** Beware of recursive locking (calling `lock()` again inside the `lock`'s critical section). The code will deadlock.
+
+## `fernet`
+
+Easy, safe symmetric encryption
+
+Fernet provides symmetric-authenticated-encryption with an API that makes misusing it difficult. It is based on a public specification and there are interoperable implementations in Rust, Python, Ruby, JavaScript, Go, and many others.
+
+```lua
+local fernet = require "fernet"
+
+local key = fernet.genkey() -- Store this somewhere safe
+local f = fernet(key)
+local secret = "my secret message"
+local encrypted = f:encrypt(secret)
+local decrypted = f:decrypt(encrypted)
+assert(secret == decrypted)
+```

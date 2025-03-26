@@ -13,6 +13,7 @@ bytesize = { version = "1.3.2", features = ["serde"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 clap = { version = "4.5.21", features = ["derive", "env", "wrap_help"] }
 derive_more = { version = "1.0.0", features = ["full"] }
+fernet = { version = "0.2.2", default-features = false, features = ["rustcrypto"] }
 futures = "0.3.31"
 http = "1.2.0"
 http-body-util = "0.1.2"

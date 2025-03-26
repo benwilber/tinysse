@@ -1,4 +1,5 @@
 pub mod base64;
+pub mod fernet;
 pub mod http;
 pub mod json;
 pub mod log;
@@ -9,6 +10,7 @@ pub mod url;
 pub mod uuid;
 
 pub use base64::Base64;
+pub use fernet::Fernet;
 pub use http::Http;
 pub use json::Json;
 pub use log::Log;

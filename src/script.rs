@@ -66,6 +66,9 @@ impl Script {
         loaded
             .set("base64", userdata::Base64 {})
             .expect("set userdata base64");
+        loaded
+            .set("fernet", userdata::Fernet {})
+            .expect("set userdata fernet");
 
         self.lua
             .load(include_str!("lua/global.lua"))
