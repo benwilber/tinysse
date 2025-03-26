@@ -12,6 +12,8 @@ The Tiny SSE server comes with several built-in packages.
 - [`log` - Log messages to the server logger](#log)
 - [`http` - Make HTTP requests](#http)
 - [`sqlite` (EXPERIMENTAL) - Use an embedded database](#sqlite-experimental)
+- [`sleep` Pause script execution](#sleep)
+- [`mutex` Lock concurrent operations](#mutex)
 
 ## `uuid`
 
@@ -319,5 +321,42 @@ function publish(pub)
 end
 ```
 
+## `sleep`
+
+Pause Script Execution
+
+```lua
+local sleep = require "sleep"
+```
+
+The `sleep` package provides a single function, `sleep`, that pauses script execution for a specified number of milliseconds. The function is useful for delaying script execution or for simulating slow operations.
+
+```lua
+sleep(1000) -- sleep for 1 second
+```
+
+**NOTE:** The `sleep` function is asynchronous and does not block the overall server's execution. It will only block the operations within the current script invocation context.
+
+## `mutex`
+
+Lock Concurrent Operations
+
+```lua
+local mutex = require "mutex"
+```
 
 
+The `mutex` package provides a single function, `mutex()`, that will create a new mutex-based lock. The returned function can be called with a function argument to synchronize concurrent operations on a shared resource.
+
+```lua
+local mutex = require "mutex"
+local lock = mutex()
+
+local res = lock(function()
+  -- Critical section
+  -- This code will be concurrency-safe
+  return do_thing_with_resource() -- Result will be returned to the outer scope `res`
+end)
+```
+
+**NOTE:** Beware of recursive locking (calling `lock()` again inside the `lock`'s critical section). The code will deadlock.
