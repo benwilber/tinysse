@@ -1,3 +1,8 @@
+0.6.0 (2025-03-26)
+===================
+* New `fernet` package in the Lua API
+* Add the program/version banner to the startup log
+
 0.5.0 (2025-03-26)
 ===================
 * New `base64` package in the Lua API
