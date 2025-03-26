@@ -1,3 +1,9 @@
+0.5.0 (2025-03-26)
+===================
+* New `base64` package in the Lua API
+* Add docs for the `mutex` and `sleep` Lua built-ins
+* Add example for publishing occupancy counts at regular intervals
+
 0.4.0 (2025-03-22)
 ===================
 * Always call `catchup(sub, last_event_id)` even if last_event_id is `nil`
