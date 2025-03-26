@@ -7,11 +7,11 @@ The Tiny SSE server comes with several built-in packages.
 - [`uuid` - Generate UUIDs](#uuid)
 - [`json` - Encode and decode JSON](#json)
   - [JSON utility functions](#json-utility-functions)
+- [`base64` - Encode and decode base64](#base64)
 - [`url` - Parse and construct URLs](#url)
 - [`log` - Log messages to the server logger](#log)
 - [`http` - Make HTTP requests](#http)
 - [`sqlite` (EXPERIMENTAL) - Use an embedded database](#sqlite-experimental)
-
 
 ## `uuid`
 
@@ -103,6 +103,28 @@ json.pprint(tbl)
 --     3
 --   ]
 -- }
+```
+
+## `base64`
+
+Encode and decode base64
+
+```lua
+local base64 = require "base64"
+local s = "some binary string"
+local e = base64.encode(s)
+local d = base64.decode(e)
+assert(s == d)
+```
+
+`base64(val)` is an alias for `base64.encode(val)`
+
+The package also supports URL-safe base64 alphabets like:
+
+```lua
+local base64 = require("base64").urlsafe()
+
+-- rest of the API is the same
 ```
 
 ## `url`

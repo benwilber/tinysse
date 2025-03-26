@@ -63,6 +63,9 @@ impl Script {
         loaded
             .set("sqlite", userdata::Sqlite {})
             .expect("set userdata sqlite");
+        loaded
+            .set("base64", userdata::Base64 {})
+            .expect("set userdata base64");
 
         self.lua
             .load(include_str!("lua/global.lua"))
