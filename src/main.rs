@@ -63,6 +63,10 @@ async fn try_main(cli: &Cli) -> anyhow::Result<()> {
 
     let listener = TcpListener::bind(&cli.listen).await?;
     let local_addr = listener.local_addr()?;
+    tracing::info!(
+        "Started {}",
+        concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"))
+    );
     tracing::info!("Listening on {local_addr}");
 
     state.script.startup(cli).await?;
