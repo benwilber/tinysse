@@ -11,7 +11,7 @@ impl Sqlite {
     /// # Arguments
     ///
     /// * `path` - A reference to a path specifying the SQLite database file.
-    ///            The special value `:memory:` can be used to open an in-memory database.
+    ///   The special value `:memory:` can be used to open an in-memory database.
     ///
     /// # Returns
     ///
@@ -96,6 +96,10 @@ impl Connection {
 }
 
 impl mlua::UserData for Connection {
+    fn add_fields<F: mlua::UserDataFields<Self>>(fields: &mut F) {
+        fields.add_field_method_get("null", |lua, _this| Ok(lua.null()));
+    }
+
     /// Adds Lua methods for the `Connection` struct.
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         /// Executes a SQL statement with parameters from Lua.
