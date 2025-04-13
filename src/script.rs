@@ -69,6 +69,9 @@ impl Script {
         loaded
             .set("fernet", userdata::Fernet {})
             .expect("set userdata fernet");
+        loaded
+            .set("template", userdata::Template {})
+            .expect("set userdata template");
 
         self.lua
             .load(include_str!("lua/global.lua"))
