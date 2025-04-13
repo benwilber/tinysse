@@ -74,11 +74,6 @@ async fn try_main(cli: &Cli) -> anyhow::Result<()> {
     tokio::select! {
         _ = async {
             // Run the script tick loop
-            let mut interval = tokio::time::interval(cli.script_tick);
-
-            // The first tick is immediate
-            interval.tick().await;
-
             let mut count = 0;
 
             loop {
@@ -88,7 +83,7 @@ async fn try_main(cli: &Cli) -> anyhow::Result<()> {
                     tracing::error!("{e}");
                 }
 
-                interval.tick().await;
+                tokio::time::sleep(cli.script_tick).await;
             }
         } => {},
 
