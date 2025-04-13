@@ -6,6 +6,7 @@ pub mod log;
 pub mod mutex;
 pub mod sleep;
 pub mod sqlite;
+pub mod template;
 pub mod url;
 pub mod uuid;
 
@@ -17,5 +18,6 @@ pub use log::Log;
 pub use mutex::Mutex;
 pub use sleep::Sleep;
 pub use sqlite::Sqlite;
+pub use template::Template;
 pub use url::Url;
 pub use uuid::Uuid;

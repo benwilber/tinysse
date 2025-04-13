@@ -19,6 +19,7 @@ http = "1.3.1"
 http-body-util = "0.1.3"
 humantime = "2.2.0"
 mime = "0.3.17"
+minijinja = { version = "2.9.0", features = ["json", "loader"] }
 mlua = { version = "0.10.3", features = ["async", "lua54", "send", "serialize", "vendored"] }
 reqwest = { version = "0.12.15", default-features = false, features = ["rustls-tls"] }
 serde = { version = "1.0.219", features = ["derive"] }
