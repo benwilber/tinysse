@@ -92,6 +92,20 @@ impl Log {
     {
         Self::log(tracing::Level::TRACE.as_str(), msg)
     }
+
+    /// Formats a log message using Lua's string.format function.
+    pub fn format(
+        lua: &mlua::Lua,
+        fmt: &str,
+        vals: mlua::MultiValue,
+    ) -> Result<String, mlua::Error> {
+        lua.globals()
+            .get::<mlua::Table>("string")
+            .expect("get string table")
+            .get::<mlua::Function>("format")
+            .expect("get format function")
+            .call::<String>((fmt, vals))
+    }
 }
 
 impl mlua::UserData for Log {
@@ -124,10 +138,42 @@ impl mlua::UserData for Log {
         methods.add_function("log", |_lua, (level, msg): (String, String)| {
             Self::log(&level, &msg)
         });
+        methods.add_function(
+            "logf",
+            |lua, (level, fmt, vals): (String, String, mlua::MultiValue)| {
+                let msg = Self::format(lua, &fmt, vals)?;
+                Self::log(&level, &msg)
+            },
+        );
+
         methods.add_function("error", |_lua, msg: String| Self::log("ERROR", &msg));
+        methods.add_function("errorf", |lua, (fmt, vals): (String, mlua::MultiValue)| {
+            let msg = Self::format(lua, &fmt, vals)?;
+            Self::log("ERROR", &msg)
+        });
+
         methods.add_function("warn", |_lua, msg: String| Self::log("WARN", &msg));
+        methods.add_function("warnf", |lua, (fmt, vals): (String, mlua::MultiValue)| {
+            let msg = Self::format(lua, &fmt, vals)?;
+            Self::log("WARN", &msg)
+        });
+
         methods.add_function("info", |_lua, msg: String| Self::log("INFO", &msg));
+        methods.add_function("infof", |lua, (fmt, vals): (String, mlua::MultiValue)| {
+            let msg = Self::format(lua, &fmt, vals)?;
+            Self::log("INFO", &msg)
+        });
+
         methods.add_function("debug", |_lua, msg: String| Self::log("DEBUG", &msg));
+        methods.add_function("debugf", |lua, (fmt, vals): (String, mlua::MultiValue)| {
+            let msg = Self::format(lua, &fmt, vals)?;
+            Self::log("DEBUG", &msg)
+        });
+
         methods.add_function("trace", |_lua, msg: String| Self::log("TRACE", &msg));
+        methods.add_function("tracef", |lua, (fmt, vals): (String, mlua::MultiValue)| {
+            let msg = Self::format(lua, &fmt, vals)?;
+            Self::log("TRACE", &msg)
+        });
     }
 }
