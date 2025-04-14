@@ -15,6 +15,7 @@ The Tiny SSE server comes with several built-in packages.
 - [`sleep` Pause script execution](#sleep)
 - [`mutex` Lock concurrent operations](#mutex)
 - [`fernet` Easy, safe symmetric encryption](#fernet)
+- [`template` Use Jinja2 templates](#template)
 
 ## `uuid`
 
@@ -322,6 +323,14 @@ function publish(pub)
 end
 ```
 
+**NOTE:** SQL `NULL` values can be represented in Lua via the `sqlite.null` constant.
+
+```lua
+db:exec("insert into tbl (name) values (?)", {db.null})
+-- Translates to the following SQL:
+-- insert into tbl (name) values (NULL)
+```
+
 ## `sleep`
 
 Pause Script Execution
@@ -377,4 +386,83 @@ local secret = "my secret message"
 local encrypted = f:encrypt(secret)
 local decrypted = f:decrypt(encrypted)
 assert(secret == decrypted)
+```
+
+
+## `template`
+
+Use Jinja2 templates
+
+Template provides a simple interface to the Jinja2 templating engine.
+
+```lua
+local template = require "template"
+```
+
+```lua
+-- The template package itself provides a single top-level function `renderstring(str, ctx)`
+local rendered = template.renderstring("Hello, {{ name }}!", { name = "World" })
+assert(rendered == "Hello, World!")
+```
+
+Using a Library for engine customization
+
+```lua
+local template = require("template").library {
+  -- Load templates from a filesystem directory
+  directory = "path/to/templates",
+
+  -- Or define templates inline
+  templates = {
+    base = [[
+      This is the base template
+      {% block user %}{% endblock %}
+    ]],
+
+    user = [[
+      {% extends "base" %}
+      {% block user %}
+          Hello, {{ user.name }}!
+      {% endblock %}
+    ]]
+  },
+
+  -- Set the template autoescaping behavior.
+  -- Can be one of "html", "json", or "none".  Defaults to "html"
+  autoescape = "html",
+
+  keep_trailing_newline = true,
+  trim_blocks = true,
+  lstrip_blocks = true
+}
+
+local rendered = template:render("user", { user = { name = "Friend" } })
+assert(rendered == [[
+This is the base template
+Hello, Friend!
+]])
+
+-- Can also render an inline template with the library
+local rendered = template:renderstring([[
+  {% extends "base" %}
+  {% block user %}
+    Good Job, {{ user.name }}!
+  {% endblock %}
+]], { user = { name = "Friend" } })
+assert(rendered == [[
+This is the base template
+Good Job, Friend!
+]])
+
+-- Add and remove templates to/from the library dynamically
+template:add("user", [[
+  {% extends "base" %}
+  {% block user %}
+    Good Job, {{ user.name }}!
+  {% endblock %}
+]])
+template:remove("user")
+
+-- Remove all templates from the library
+template:clear()
 ```

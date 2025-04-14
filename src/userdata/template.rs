@@ -6,9 +6,15 @@ pub struct Template;
 
 impl mlua::UserData for Template {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_function("setup", |_lua, opts: mlua::Table| Env::new_with_opts(opts));
+        methods.add_function("library", |_lua, opts: Option<mlua::Table>| {
+            if let Some(opts) = opts {
+                Env::new_with_opts(opts)
+            } else {
+                Ok(Env::default())
+            }
+        });
         methods.add_function(
-            "render",
+            "renderstring",
             |lua, (src, ctx): (String, Option<mlua::Table>)| {
                 let ctx = match ctx {
                     Some(tbl) => tbl,
@@ -49,6 +55,15 @@ impl Env {
             env.set_loader(minijinja::path_loader(dir));
         }
 
+        // Inline templates
+        if let Ok(tbl) = opts.get::<mlua::Table>("templates") {
+            for pair in tbl.pairs() {
+                let (key, value): (String, String) = pair?;
+                env.add_template_owned(key, value)
+                    .map_err(mlua::Error::external)?;
+            }
+        }
+
         // Autoescape behavior
         if let Ok(autoescape) = opts.get::<String>("autoescape") {
             match autoescape.to_lowercase().as_str() {
@@ -82,7 +97,7 @@ impl Env {
 impl mlua::UserData for Env {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method(
-            "render_string",
+            "renderstring",
             |lua, this, (src, ctx): (String, Option<mlua::Table>)| {
                 let ctx = match ctx {
                     Some(tbl) => tbl,
