@@ -20,7 +20,7 @@ impl mlua::UserData for InnerMutex {
             mlua::MetaMethod::Call,
             |_lua, this, func: mlua::Function| async move {
                 let _guard = this.inner.lock().await;
-                func.call_async::<Option<mlua::Value>>(()).await
+                func.call_async::<mlua::MultiValue>(()).await
             },
         );
     }
