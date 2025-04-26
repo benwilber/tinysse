@@ -1,7 +1,7 @@
 build:
     cargo build
     
-release:
+build-release:
     cargo build --release
 
 clean:
@@ -34,6 +34,6 @@ ready: fmt check test doc
 run *args:
     cargo run -- {{ args }}
 
-runrelease *args:
+run-release *args:
     cargo run --release -- {{ args }}
 
