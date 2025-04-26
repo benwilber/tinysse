@@ -1,3 +1,7 @@
+0.7.3 (2025-04-26)
+===================
+* Updating Cargo dependencies
+
 0.7.2 (2025-04-26)
 ===================
 * Release builds now have LTO and codegen optimizations enabled
