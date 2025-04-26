@@ -1,10 +1,13 @@
+0.7.1 (2025-04-26)
+===================
+* Return multi-value from Lua mutex lock functions
+
 0.7.0 (2025-04-14)
 ===================
 * New `template` package in the Lua API
 * Add formatted logging functions to the `log` package
 * Add `sqlite.null` to represent SQL `NULL` values in the Lua API
 * Use `tokio::time::sleep` instead of `interval` for script tick intervals
-
 
 0.6.0 (2025-03-28)
 ===================
