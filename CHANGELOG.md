@@ -1,3 +1,8 @@
+0.7.2 (2025-04-26)
+===================
+* Release builds now have LTO and codegen optimizations enabled
+* Rename the justfile commands for releases to `build-release` and `run-release`
+
 0.7.1 (2025-04-26)
 ===================
 * Return multi-value from Lua mutex lock functions
